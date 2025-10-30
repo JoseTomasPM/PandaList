@@ -1,19 +1,25 @@
-# https://hub.docker.com/_/microsoft-dotnet
+# Etapa 1: build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /source
+WORKDIR /app
 
-# copy csproj and restore as distinct layers
-COPY *.sln .
-COPY aspnetapp/*.csproj ./aspnetapp/
+# Copia todo el proyecto
+COPY . .
+
+# Restaurar dependencias
 RUN dotnet restore
 
-# copy everything else and build app
-COPY aspnetapp/. ./aspnetapp/
-WORKDIR /source/aspnetapp
-RUN dotnet publish -c release -o /app --no-restore
+# Publicar en Release
+RUN dotnet publish -c Release -o out
 
-# final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
+# Etapa 2: runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app ./
+
+# Copiar archivos publicados
+COPY --from=build /app/out .
+
+# Render asigna el puerto en la variable PORT
+ENV ASPNETCORE_URLS=http://+:$PORT
+
+# Nombre del DLL principal — cámbialo si tu proyecto tiene otro nombre
 ENTRYPOINT ["dotnet", "PandaList.dll"]
