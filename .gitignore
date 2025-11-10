@@ -276,7 +276,8 @@ ServiceFabricBackup/
 *- [Bb]ackup ([0-9][0-9]).rdl
 
 # Microsoft Fakes
-FakesAssemblies/
+Fakes
+mblies/
 
 # GhostDoc plugin setting file
 *.GhostDoc.xml
