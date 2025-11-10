@@ -1,10 +1,43 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PandaList.Components;
+using PandaList.Data;
+using Microsoft.AspNetCore.Authentication.Google;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+// Servicios Razor
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Antiforgery
+builder.Services.AddAntiforgery();
+
+//DB Context
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnetion")));
+
+// Identity
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+//Autentication (Google)
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    });
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
+
 
 var app = builder.Build();
 
@@ -18,7 +51,11 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+
+app.UseAuthorization();
 app.UseStaticFiles();
+
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
