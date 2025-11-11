@@ -18,7 +18,7 @@ builder.Services.AddAntiforgery();
 
 //DB Context
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnetion")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
@@ -26,6 +26,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 //Autentication (Google)
+
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
