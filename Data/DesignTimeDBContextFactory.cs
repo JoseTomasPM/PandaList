@@ -17,7 +17,7 @@ namespace PandaList.Data
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"));
 
-            return new AppDbContext(optionsBuilder.Options, config);
+            return new AppDbContext(optionsBuilder.Options);
         }
     }
 }

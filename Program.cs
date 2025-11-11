@@ -1,11 +1,32 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PandaList.Components;
 using PandaList.Data;
 
-
+DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+DotNetEnv.Env.Load();
+Console.WriteLine("ENV loaded!");
+
+Console.WriteLine($"HOST env => {Environment.GetEnvironmentVariable("HOST")}");
+
+
+
+
+//DB connection
+var host = Environment.GetEnvironmentVariable("HOST");
+var port = Environment.GetEnvironmentVariable("PORT");
+var database = Environment.GetEnvironmentVariable("DATABASE");
+var user = Environment.GetEnvironmentVariable("USER");
+var password = Environment.GetEnvironmentVariable("PASSWORD");
+
+var connectionString = $"Host={host};Port={port};Database={database};Username={user};Password={password};";
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
 
 
 // Servicios Razor
@@ -15,9 +36,7 @@ builder.Services.AddRazorComponents()
 // Antiforgery
 builder.Services.AddAntiforgery();
 
-//DB Context
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
@@ -32,6 +51,32 @@ builder.Services.AddRazorPages();
 
 
 var app = builder.Build();
+
+//test 
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    try
+    {
+        dbContext.Database.OpenConnection();
+        dbContext.Database.CloseConnection();
+        Console.WriteLine("😸 Connected to DB");
+    }
+    catch (Exception ex)
+    { 
+        Console.WriteLine($" 😿👍Error connecting DB: {ex.Message}");
+    }
+}
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseHsts();
+}
+
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
