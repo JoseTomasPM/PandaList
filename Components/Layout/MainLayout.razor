@@ -1,7 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
 
 <div class="page">
     <div class="sidebar">
@@ -10,16 +7,9 @@
 
     <main>
         <div class="top-row px-4">
-            <AuthorizeView>
-                <Authorized>
-                    <a class="btn btn-danger" href="/Account/Logout">Cerrar sesión</a>
-                </Authorized>
-
-                <NotAuthorized>
-                    <a class="btn btn-primary" href="/Account/ExternalLogin?provider=Google">Iniciar sesión con Google</a>
-                </NotAuthorized>
-            </AuthorizeView>
-
+            <a class="btn btn-primary">
+                Login with Google
+            </a>
 
         </div>
 

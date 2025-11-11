@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PandaList.Components;
 using PandaList.Data;
-using Microsoft.AspNetCore.Authentication.Google;
 
 
 
@@ -25,14 +24,6 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-//Autentication (Google)
-
-builder.Services.AddAuthentication()
-    .AddGoogle(options =>
-    {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-    });
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
