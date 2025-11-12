@@ -27,6 +27,8 @@ var connectionString = $"Host={host};Port={port};Database={database};Username={u
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+var portApp = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+builder.WebHost.UseUrls($"http://0.0.0.0:{portApp}");
 
 
 // Servicios Razor
@@ -61,7 +63,7 @@ using (var scope = app.Services.CreateScope())
     {
         dbContext.Database.OpenConnection();
         dbContext.Database.CloseConnection();
-        Console.WriteLine("😸 Connected to DB");
+        Console.WriteLine("😸  Connected to DB");
     }
     catch (Exception ex)
     { 
