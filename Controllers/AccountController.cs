@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using PandaList.Models;
 
 
 namespace PandaList.Controllers
@@ -19,42 +20,55 @@ namespace PandaList.Controllers
             _signInManager = signInManager;
         }
 
-        // Login (Google)
+        //Register Get
         [HttpGet]
-        public IActionResult ExternalLogin(string provider)
-        {
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback));
-            var props = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return Challenge(props, provider);
-        }
+        public IActionResult Register() => View();
 
-        // Callback Google
-        [HttpGet]
-        public async Task<IActionResult> ExternalLoginCallback()
+        //Register Post
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-                return Redirect("/");
+            if (!ModelState.IsValid)
+                return View(model);
 
-            // Login if existing user
-            var result = await _signInManager.ExternalLoginSignInAsync(
-                info.LoginProvider, info.ProviderKey, isPersistent: false);
+            var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+            var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
+            {
+                await _signInManager.SignInAsync(user, false);
                 return Redirect("/");
+            }
 
-            // New user → create account
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            var user = new IdentityUser { UserName = email, Email = email };
+            foreach (var e in result.Errors)
+                ModelState.AddModelError("", e.Description);
 
-            await _userManager.CreateAsync(user);
-            await _userManager.AddLoginAsync(user, info);
-            await _signInManager.SignInAsync(user, false);
-
-            return Redirect("/");
+            return View(model);
         }
 
-        // Logout
+
+        //Login Get
+        [HttpGet]
+        public IActionResult Login() => View();
+
+
+        //Login Post
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+            if (result.Succeeded)
+            {
+                return Redirect("/");
+            }
+            ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
+            return View(model);
+        }
+
+
+        //Logout
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
