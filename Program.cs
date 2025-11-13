@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using PandaList.Components;
 using PandaList.Data;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
+
 
 DotNetEnv.Env.Load();
 
@@ -10,7 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
 Console.WriteLine("ENV loaded!");
 
-Console.WriteLine($"HOST env => {Environment.GetEnvironmentVariable("HOST")}");
 
 
 
@@ -27,8 +29,7 @@ var connectionString = $"Host={host};Port={port};Database={database};Username={u
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-var portApp = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-builder.WebHost.UseUrls($"http://0.0.0.0:{portApp}");
+var portApp = Environment.GetEnvironmentVariable("PORT") ?? "5432";
 
 
 // Servicios Razor
@@ -38,18 +39,13 @@ builder.Services.AddRazorComponents()
 // Antiforgery
 builder.Services.AddAntiforgery();
 
-
-
-// Identity
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
-
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+//Autentication
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<AppDbContext>();
 
 
 var app = builder.Build();
@@ -76,8 +72,6 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
-
-
 
 
 // Configure the HTTP request pipeline.

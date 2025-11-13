@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -14,6 +18,31 @@
 
 <body>
     <Routes />
+    <CascadingAuthenticationState>
+        <Router AppAssembly="@(typeof(Program).Assembly)">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@(typeof(PandaList.Components.Layout.MainLayout))">
+                    <NotAuthorized>
+                        <div class="text-center mt-5">
+                            <h3>You are not authorized to view this page.</h3>
+                            <a href="/login" class="btn btn-primary mt-3">Sign in</a>
+                        </div>
+                    </NotAuthorized>
+                    <Authorizing>
+                        <div class="text-center mt-5">
+                            <p>Authenticating...</p>
+                        </div>
+                    </Authorizing>
+                </AuthorizeRouteView>
+            </Found>
+            <NotFound>
+                <LayoutView Layout="@(typeof(PandaList.Components.Layout.MainLayout))">
+                    <h3>Page not found</h3>
+                    <p>Sorry, the page you requested doesn't exist.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </CascadingAuthenticationState>
     <script src="_framework/blazor.web.js"></script>
 </body>
 

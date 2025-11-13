@@ -1,0 +1,41 @@
+﻿@page "/login"
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject NavigationManager Nav
+
+
+<h3>Login</h3>
+
+@if (error != null)
+{
+    <p style="color:#ff0000">@error</p>
+}
+
+
+<input @bind="email" placeholder="Email" class="form-control" />
+<input @bind="password" placeholder="Password" class="form-control" type="password" />
+
+<button class="btn btn-primary" onclick="DoLogin">Login</button>
+
+@code {
+
+	string email;
+	string password;
+	string error;
+
+
+	async Task DoLogin()
+	{
+		var result = await SignInManager.PasswordSignInAsync(email, password, false, false);
+		if (result.Succeeded)
+		{
+			Nav.NavigateTo("/");
+		}
+		else
+		{
+			error = "User or password wrong";
+		}
+	}
+
+
+}

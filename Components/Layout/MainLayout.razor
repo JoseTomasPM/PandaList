@@ -1,4 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject NavigationManager Nav
+@inject SignInManager<IdentityUser> SignInManager
+@inherits LayoutComponentBase
 
 <div class="page">
     <div class="sidebar">
@@ -7,10 +11,18 @@
 
     <main>
         <div class="top-row px-4">
-            <a class="btn btn-primary">
-                Login with Google
-            </a>
-
+            <CascadingAuthenticationState>
+                <AuthorizeView>
+                    <Authorized>
+                        <span>Hi!</span>
+                        <a class="btn btn-danger" @onclick="Logout">Logout</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a class="btn btn-primary" href="/login">Login</a>
+                        <a class="btn btn-secondary" href="/register">SignUp</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </CascadingAuthenticationState>
         </div>
 
         <article class="content px-4">
@@ -24,3 +36,11 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private async Task Logout()
+    {
+        await SignInManager.SignOutAsync();
+        Nav.NavigateTo("/");
+    }
+}

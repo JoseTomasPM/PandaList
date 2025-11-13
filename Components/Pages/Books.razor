@@ -1,0 +1,84 @@
+﻿@page "/books"		
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using PandaList.Models
+@using PandaList.Data
+@inject AppDbContext Db
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+
+
+
+
+<h3>Books</h3>
+
+@if (isLoading)
+{
+    <p>Loanding...</p>
+}
+else if (!books.Any())
+{
+    <p>No Books <a href="/books/new" class="text-blue-500 underline">Add book</a>.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Fecha de lectura</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in books)
+            {
+                <tr>
+                    <td>@book.Title</td>
+                    <td>@book.Author</td>
+                    <td>@(book.ReadDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="() => Delete(book.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button class="btn btn-success mt-3" @onclick="() => Nav.NavigateTo("/books/nes")">Add book</button>
+}
+
+@code {
+    private List<Book> books = new();
+    private bool isLoading = true;
+    private string userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthProvider.GetAuthenticationStateAsync();
+        var user = auth.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            books = await Db.Books
+                .Where(b => b.UserId == userId)
+                .OrderByDescending(b => b.Id)
+                .ToListAsync();
+        }
+
+        isLoading = false;
+    }
+
+    async Task Delete(int id)
+    {
+        var libro = await Db.Books.FindAsync(id);
+        if (libro != null && libro.UserId == userId)
+        {
+            Db.Books.Remove(libro);
+            await Db.SaveChangesAsync();
+            books.Remove(libro);
+        }
+    }
+}
