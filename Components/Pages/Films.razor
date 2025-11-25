@@ -1,0 +1,151 @@
+﻿@page "/films"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using PandaList.Models
+@using PandaList.Data
+@inject AppDbContext Db
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+@using Microsoft.EntityFrameworkCore
+
+
+<h3>Films</h3>
+
+@if (isLoading)
+{
+	<p>Loading....</p>
+}
+else
+{
+	<button class="btn btn-primary mb-3" @onclick="OpenModal">Add New Film</button>
+
+	@if(!films.Any())
+	{
+		<p>No films yet.</p>
+	}
+	else
+	{
+		<table class="table table table-striped">
+			<thead>
+				<tr>
+					<th>Title</th>
+					<th>Director</th>
+					<th>Date watched</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var film in films)
+				{
+					<tr>
+						<td>@film.Title</td>
+						<td>@film.Director</td>
+						<td>@(film.Year)</td>
+						<td>
+							<button class="btn btn-danger btn-sm" @onclick="() => Delete(film.Id)">Delete</button>
+						</td>
+					</tr>
+				}
+			</tbody>)
+
+		</table>
+	}
+
+}
+
+
+@if (showModal)
+{
+	<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+
+		<div class="modal-dialog">
+
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<h5 class="modal-title">Add New Film</h5>
+					<button type="button" class="btn-close" @onclick="CloseModal"></button>
+				</div>
+
+				<div class="modal-body">
+					<EditForm Model="newFilm" OnValidSubmit="Save">
+						<DataAnnotationsValidator/>
+						<ValidationSummary/>
+
+						<div class="mb-3">
+							<label for="title" class="form-label">Title</label>
+							<input type="text" id="title" class="form-control" @bind="newFilm.Title" />
+						</div>
+						<div class="mb-3">
+							<label for="director" class="form-label">Director</label>
+							<input type="text" id="director" class="form-control" @bind="newFilm.Director" />
+						</div>
+						<div class="mb-3">
+							<label for="watchDate" class="form-label">Date Watched</label>
+							<input class="year" @bind="newFilm.Year" />
+						</div>
+
+						<button type="submit" class="btn btn-primary">Save</button>
+
+					</EditForm>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+
+
+@code {
+	private List<Film> films = new();
+	private bool isLoading = true;
+	private bool showModal = false;
+	private Film newFilm = new();
+	private string userId = "";
+
+	protected override async Task OnInitializedAsync()
+	{
+		var auth = await AuthProvider.GetAuthenticationStateAsync();
+		var user = auth.User;
+		if (user.Identity is not { IsAuthenticated: true })
+		{
+			Nav.NavigateTo("/login");
+			return;
+		}
+		userId = user.FindFirst(c => c.Type.EndsWith("nameidentifier"))?.Value ?? "";
+		films = await Db.Films.Where(f => f.UserId == userId).ToListAsync();
+		isLoading = false;
+	}
+
+	private void OpenModal()
+	{
+		newFilm = new Film();
+		showModal = true;
+	}
+	private void CloseModal() => showModal = false;
+
+
+	async	private Task Save()
+	{
+		newFilm.UserId = userId;
+		Db.Films.Add(newFilm);
+		await Db.SaveChangesAsync();
+		films.Add(newFilm);
+		showModal = false;
+	}
+
+	async private Task Delete(int id)
+	{
+		var film = await Db.Films.FindAsync(id);
+		if (film != null && film.UserId == userId)
+		{
+			Db.Films.Remove(film);
+			await Db.SaveChangesAsync();
+			films.Remove(film);
+		}
+	}
+	
+}

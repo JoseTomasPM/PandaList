@@ -14,7 +14,7 @@ namespace PandaList.Models
 
         public string Director { get; set; }
 
-        public int? Year { get; set; }
+        public int Year { get; set; }
 
         [ForeignKey("User")]
         public string UserId { get; set; }
