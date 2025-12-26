@@ -8,12 +8,12 @@ Console.WriteLine("ENV loaded!");
 
 // DB connection
 var host = Environment.GetEnvironmentVariable("PGHOST");
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5432";
+
 var database = Environment.GetEnvironmentVariable("PGDATABASE");
 var user = Environment.GetEnvironmentVariable("PGUSER");
 var password = Environment.GetEnvironmentVariable("PGPASSWORD");
 
-var connectionString = $"Host={host};Port={port};Database={database};Username={user};Password={password};";
+var connectionString = $"Host={host};Port=5432;Database={database};Username={user};Password={password};";
 
 var builder = WebApplication.CreateBuilder(args);
 
