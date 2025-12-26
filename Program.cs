@@ -1,72 +1,42 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using PandaList.Components;
 using PandaList.Data;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
 
-
-DotNetEnv.Env.Load();
-
-var builder = WebApplication.CreateBuilder(args);
-
-DotNetEnv.Env.Load();
+Env.Load();
 Console.WriteLine("ENV loaded!");
 
-
-
-
-
-//DB connection
-var host = Environment.GetEnvironmentVariable("HOST");
-var port = Environment.GetEnvironmentVariable("PORT");
-var database = Environment.GetEnvironmentVariable("DATABASE");
-var user = Environment.GetEnvironmentVariable("USER");
-var password = Environment.GetEnvironmentVariable("PASSWORD");
+// DB connection
+var host = Environment.GetEnvironmentVariable("PGHOST");
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5432";
+var database = Environment.GetEnvironmentVariable("PGDATABASE");
+var user = Environment.GetEnvironmentVariable("PGUSER");
+var password = Environment.GetEnvironmentVariable("PGPASSWORD");
 
 var connectionString = $"Host={host};Port={port};Database={database};Username={user};Password={password};";
 
+var builder = WebApplication.CreateBuilder(args);
+
+// DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-var portApp = Environment.GetEnvironmentVariable("PORT") ?? "5432";
+// Identity
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+})
+.AddEntityFrameworkStores<AppDbContext>();
 
-
-// Servicios Razor
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-// Antiforgery
-builder.Services.AddAntiforgery();
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+// Razor / Blazor
 builder.Services.AddRazorPages();
-
-//Autentication
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<AppDbContext>();
-
-
-
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-
+builder.Services.AddServerSideBlazor();
+builder.Services.AddControllersWithViews();
+builder.Services.AddAntiforgery();
 
 var app = builder.Build();
 
-//test 
-
+// Test DB connection
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -74,39 +44,30 @@ using (var scope = app.Services.CreateScope())
     {
         dbContext.Database.OpenConnection();
         dbContext.Database.CloseConnection();
-        Console.WriteLine("😸  Connected to DB");
+        Console.WriteLine("😸 Connected to DB");
     }
     catch (Exception ex)
-    { 
-        Console.WriteLine($" 😿👍Error connecting DB: {ex.Message}");
+    {
+        Console.WriteLine($"😿 Error connecting DB: {ex.Message}");
     }
 }
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseHsts();
-}
-
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication();
-
-app.UseAuthorization();
 app.UseStaticFiles();
 
-app.UseAntiforgery();
+app.UseRouting();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
 
 app.Run();
