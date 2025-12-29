@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+
 
 namespace PandaList.Models
 {
@@ -19,6 +20,6 @@ namespace PandaList.Models
         [ForeignKey("User")]
         public string UserId { get; set; }
 
-        public IdentityUser User { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }

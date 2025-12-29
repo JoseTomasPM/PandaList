@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PandaList.Data;
 using DotNetEnv;
+using PandaList.Models;
 
 Env.Load();
 Console.WriteLine("ENV loaded!");
@@ -22,7 +23,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Identity
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;
 })
