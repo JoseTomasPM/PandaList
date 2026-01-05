@@ -6,17 +6,20 @@
 }
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PandaList</title>
     <base href="~/" />
-    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="PandaList.styles.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
 </head>
 <body>
     <app>
-        <component type="typeof(PandaList.Components.App)" render-mode="ServerPrerendered" />
+        <component type="typeof(App)" render-mode="ServerPrerendered" />
     </app>
 
     <script src="_framework/blazor.server.js"></script>

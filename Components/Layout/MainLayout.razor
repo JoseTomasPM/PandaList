@@ -11,18 +11,19 @@
 
     <main>
         <div class="top-row px-4">
-            <CascadingAuthenticationState>
-                <AuthorizeView>
-                    <Authorized>
-                        <span>Hi!</span>
-                        <a class="btn btn-danger" @onclick="Logout">Logout</a>
-                    </Authorized>
-                    <NotAuthorized>
-                        <a class="btn btn-primary" href="/login">Login</a>
-                        <a class="btn btn-secondary" href="/register">SignUp</a>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </CascadingAuthenticationState>
+            <AuthorizeView>
+                <Authorized>
+                    <span>Hola @context.User.Identity?.Name</span>
+                    <form method="post" action="Identity/Account/Logout">
+                        <button type="submit">Logout</button>
+                    </form>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="Identity/Account/Login">Login</a>
+                    <a href="Identity/Account/Register">Register</a>
+                </NotAuthorized>
+            </AuthorizeView>
+
         </div>
 
         <article class="content px-4">

@@ -1,12 +1,17 @@
 ﻿@page "/series"	
+@attribute [Authorize]
+
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 @using PandaList.Models
 @using PandaList.Data
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+
 @inject AppDbContext Db
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
-@using Microsoft.EntityFrameworkCore
+
 
 
 

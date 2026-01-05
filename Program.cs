@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using PandaList.Data;
 using DotNetEnv;
 using PandaList.Models;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
+
 
 Env.Load();
 Console.WriteLine("ENV loaded!");
@@ -25,8 +28,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Identity
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedAccount = false;
 })
+.AddDefaultUI()
 .AddEntityFrameworkStores<AppDbContext>();
 
 // Razor / Blazor
@@ -35,8 +39,11 @@ builder.Services.AddRazorPages(options =>
     options.RootDirectory = "/Components/Pages";
 });
 builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddAntiforgery();
+builder.Services.AddAuthorizationCore();
+
 
 var app = builder.Build();
 
@@ -71,7 +78,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapRazorPages();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+
 
 app.Run();

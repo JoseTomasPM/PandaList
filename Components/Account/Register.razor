@@ -1,45 +1,53 @@
 ﻿@page "/register"
-@using Microsoft.AspNetCore.Identity
 @inject UserManager<IdentityUser> UserManager
 @inject SignInManager<IdentityUser> SignInManager
-@inject NavigationManager Nav
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Identity
+@using System.ComponentModel.DataAnnotations
 
 <h3>Register</h3>
 
-@if(error != null)
+<EditForm Model="registerModel" OnValidSubmit="HandleRegister">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="registerModel.Email" />
+    </div>
+    <div>
+        <label>Password:</label>
+        <InputText @bind-Value="registerModel.Password" type="password" />
+    </div>
+    <div>
+        <label>Confirm Password:</label>
+        <InputText @bind-Value="registerModel.ConfirmPassword" type="password" />
+    </div>
+    <button type="submit">Register</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
 {
-	<p style="color:#ff0000">@error</p>
+    <p style="color:red">@errorMessage</p>
 }
 
-<input @bind="email" placeholder="Email" class="form-control" />
-<input @bind="password" placeholder="Password" class="form-control" type="password" />
-<input @bind="confirm" placeholder="Confirm Password" class="form-control" type="password" />	
-
-<button class="btn btn-primary" onclick="DoRegister">Register</button>
-
 @code {
-    string email;
-    string password;
-    string confirm;
-    string error;
+    private Models.RegisterViewModel registerModel = new();
+    private string errorMessage;
 
-	async Task DoRegister()
-	{
-		if (password != confirm)
-		{
-			error = "Passwords do not match";
-			return;
-		}
-		var user = new IdentityUser { UserName = email, Email = email };
-		var result = await UserManager.CreateAsync(user, password);
-		if (result.Succeeded)
-		{
-			await SignInManager.SignInAsync(user, isPersistent: false);
-			Nav.NavigateTo("/");
-		}
-		else
-		{
-			error = "Registration failed: " + string.Join(", ", result.Errors.Select(e => e.Description));
-		}
-	}
+    private async Task HandleRegister()
+    {
+        var user = new IdentityUser { UserName = registerModel.Email, Email = registerModel.Email };
+        var result = await UserManager.CreateAsync(user, registerModel.Password);
+
+        if (result.Succeeded)
+        {
+            await SignInManager.SignInAsync(user, isPersistent: false);
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+        }
+    }
 }
