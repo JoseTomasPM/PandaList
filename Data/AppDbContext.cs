@@ -1,19 +1,19 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PandaList.Models;
 
 namespace PandaList.Data
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser>
+    public class AppDbContext : IdentityDbContext<IdentityUser>
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) 
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
-        
-        public DbSet<Models.Film> Films { get; set; }
-        public DbSet<Models.Series> Series { get; set; }
-        public DbSet<Models.Book> Books { get; set; }   
 
+        public DbSet<Book> Books => Set<Book>();
+        public DbSet<Film> Films => Set<Film>();
+        public DbSet<Series> Series => Set<Series>();
     }
 }
