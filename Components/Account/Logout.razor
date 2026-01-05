@@ -1,15 +1,12 @@
-﻿@page "/logout"
-@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
+﻿@inject HttpClient Http
 @inject NavigationManager Nav
 
-
-<h3>Logout</h3>
+<button @onclick="DoLogout">Logout</button>
 
 @code {
-    protected override async Task OnInitializedAsync()
+    async Task DoLogout()
     {
-        await SignInManager.SignOutAsync();
-        Nav.NavigateTo("/");
+        await Http.PostAsync("/auth/logout", null);
+        Nav.NavigateTo("/", true);
     }
 }

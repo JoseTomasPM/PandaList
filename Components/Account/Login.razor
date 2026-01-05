@@ -1,51 +1,30 @@
-﻿@page "/login"
-@inject SignInManager<IdentityUser> SignInManager
-@inject NavigationManager NavigationManager
-@using Microsoft.AspNetCore.Identity
-@using System.ComponentModel.DataAnnotations
+﻿@inject HttpClient Http
+@inject NavigationManager Nav
 
-<h3>Login</h3>
-
-<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div>
-        <label>Email:</label>
-        <InputText @bind-Value="loginModel.Email" />
-    </div>
-    <div>
-        <label>Password:</label>
-        <InputText @bind-Value="loginModel.Password" type="password" />
-    </div>
+<EditForm OnValidSubmit="HandleLogin">
+    <InputText @bind-Value="email" />
+    <InputText @bind-Value="password" type="password" />
     <button type="submit">Login</button>
 </EditForm>
 
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <p style="color:#900">@errorMessage</p>
-}
-
 @code {
-    private Models.LoginViewModel loginModel = new();
-    private string errorMessage;
+    string email = "";
+    string password = "";
+    string? errorMessage;
 
-    private async Task HandleLogin()
+    async Task HandleLogin()
     {
-        var result = await SignInManager.PasswordSignInAsync(
-            loginModel.Email,
-            loginModel.Password,
-            isPersistent: false,
-            lockoutOnFailure: false
-        );
+        var form = new FormUrlEncodedContent(new[]
+        {
+            new KeyValuePair<string,string>("email", email),
+            new KeyValuePair<string,string>("password", password)
+        });
 
-        if (result.Succeeded)
-        {
-            NavigationManager.NavigateTo("/");
-        }
+        var res = await Http.PostAsync("/auth/login", form);
+
+        if (res.IsSuccessStatusCode)
+            Nav.NavigateTo("/", true);
         else
-        {
-            errorMessage = "Email or password wrong";
-        }
+            errorMessage = "Login incorrecto";
     }
 }

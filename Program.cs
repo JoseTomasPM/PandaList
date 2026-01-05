@@ -58,19 +58,6 @@ builder.Services.AddDataProtection()
 
 var app = builder.Build();
 
-//  TEST CREATE USER 
-
-using (var scope = app.Services.CreateScope())
-{
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    var test = await userManager.FindByEmailAsync("test@test.com");
-    if (test == null)
-    {
-        var u = new IdentityUser { UserName = "test@test.com", Email = "test@test.com" };
-        var r = await userManager.CreateAsync(u, "Test123!");
-        Console.WriteLine($"Test user created: {r.Succeeded}");
-    }
-}
 
 
 
