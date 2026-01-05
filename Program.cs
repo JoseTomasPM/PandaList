@@ -26,12 +26,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Identity
-builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+builder.Services
+    .AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false;
-})
-.AddDefaultUI()
-.AddEntityFrameworkStores<AppDbContext>();
+    options.LoginPath = "/login";
+    options.LogoutPath = "/logout";
+    options.AccessDeniedPath = "/access-denied";
+});
+
 
 // Razor / Blazor
 builder.Services.AddRazorPages(options =>
