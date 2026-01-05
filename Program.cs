@@ -5,6 +5,7 @@ using DotNetEnv;
 using PandaList.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.DataProtection;
 
 
 Env.Load();
@@ -50,6 +51,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAntiforgery();
 builder.Services.AddAuthorizationCore();
 
+//Data protection 
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/data/dataprotection"))
+    .SetApplicationName("PandaList");
 
 var app = builder.Build();
 
