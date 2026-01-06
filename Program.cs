@@ -6,7 +6,8 @@ using PandaList.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.DataProtection;
-
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 Env.Load();
 Console.WriteLine("ENV loaded!");
@@ -24,6 +25,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Identity
@@ -52,9 +56,15 @@ builder.Services.AddAntiforgery();
 builder.Services.AddAuthorizationCore();
 
 //Data protection 
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/var/data/dataprotection"))
+
+builder.Services
+    .AddDataProtection()
+    .PersistKeysToDbContext<DataProtectionKeyContext>()
     .SetApplicationName("PandaList");
+
+
+
+
 
 var app = builder.Build();
 
