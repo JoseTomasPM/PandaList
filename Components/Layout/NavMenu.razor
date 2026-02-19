@@ -1,17 +1,23 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 @inject NavigationManager Nav
-@inject SignInManager<IdentityUser> SignInManager
+
 @inherits LayoutComponentBase
 
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">PandaList</a>
-    </div>
+        <a class="navbar-brand" href="">PandaList</a>       
+    </div>    
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+
+
+
+   
+
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
@@ -38,8 +44,6 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Films
             </NavLink>
         </div>
-
-
 
 
     </nav>

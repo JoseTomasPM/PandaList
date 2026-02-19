@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace PandaList.Components.Pages
+namespace PandaList.Pages
 {
     public class _HostModel : PageModel
     {
