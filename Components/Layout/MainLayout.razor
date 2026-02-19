@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 @inject NavigationManager Nav
-
+@inject SignInManager<IdentityUser> SignInManager
 @inherits LayoutComponentBase
 
 <div class="page">
@@ -9,22 +9,19 @@
         <NavMenu />
     </div>
 
-
-
-
     <main>
-        <div class="top-row px-4">            
-            <a href="/Identity/Account/Login" class="btn btn-primary mt-3">Login</a>
-            <a href="/Identity/Account/Register" class="btn btn-primary mt-3">Register</a>
+        <div class="top-row px-4">
             <AuthorizeView>
                 <Authorized>
                     <span>Hola @context.User.Identity?.Name</span>
                     <form method="post" action="Identity/Account/Logout">
                         <button type="submit">Logout</button>
                     </form>
-
                 </Authorized>
-                
+                <NotAuthorized>
+                    <a href="/login" class="btn btn-primary mt-3">Login</a>
+                    <a href="/register" class="btn btn-primary mt-3">Register</a>
+                </NotAuthorized>
             </AuthorizeView>
 
         </div>
@@ -41,4 +38,10 @@
     <a class="dismiss">🗙</a>
 </div>
 
-
+@code {
+    private async Task Logout()
+    {
+        await SignInManager.SignOutAsync();
+        Nav.NavigateTo("/");
+    }
+}

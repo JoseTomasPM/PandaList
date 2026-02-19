@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PandaList.Data;
 using DotNetEnv;
@@ -7,67 +7,86 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 Env.Load();
 Console.WriteLine("ENV loaded!");
 
+// DB connection
+var host = Environment.GetEnvironmentVariable("PGHOST");
+
+var database = Environment.GetEnvironmentVariable("PGDATABASE");
+var user = Environment.GetEnvironmentVariable("PGUSER");
+var password = Environment.GetEnvironmentVariable("PGPASSWORD");
+
+var connectionString = $"Host={host};Port=5432;Database={database};Username={user};Password={password};";
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Connection string
-var connectionString =
-    builder.Configuration.GetConnectionString("AppDbContextConnection")
-    ?? throw new InvalidOperationException("Connection string 'AppDbContextConnection' not found.");
-
-// DbContexts
+// DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
     options.UseNpgsql(connectionString));
 
-// ✅ IDENTITY (SOLO UNA VEZ)
+// Identity
 builder.Services
-    .AddDefaultIdentity<ApplicationUser>(options =>
-    {
-        options.SignIn.RequireConfirmedAccount = false;
-    })
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>();
+    .AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
-// Razor + Blazor
-builder.Services.AddRazorPages();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/login";
+    options.LogoutPath = "/logout";
+    options.AccessDeniedPath = "/access-denied";
+});
+
+
+// Razor / Blazor
+builder.Services.AddRazorPages(options =>
+{
+    options.RootDirectory = "/Components/Pages";
+});
 builder.Services.AddServerSideBlazor();
-
-// Auth for Blazor
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+builder.Services.AddControllersWithViews();
+builder.Services.AddAntiforgery();
 builder.Services.AddAuthorizationCore();
 
-// Data Protection
+//Data protection 
+
 builder.Services
     .AddDataProtection()
     .PersistKeysToDbContext<DataProtectionKeyContext>()
     .SetApplicationName("PandaList");
 
-// Cookies
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Identity/Account/Login";
-    options.LogoutPath = "/Identity/Account/Logout";
-    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-});
+
+
+
 
 var app = builder.Build();
 
-// DB test
+
+
+
+// Test DB connection
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.OpenConnection();
-    db.Database.CloseConnection();
-    Console.WriteLine("😸 Connected to DB");
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    try
+    {
+        dbContext.Database.OpenConnection();
+        dbContext.Database.CloseConnection();
+        Console.WriteLine("😸 Connected to DB");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"😿 Error connecting DB: {ex.Message}");
+    }
 }
 
-// Pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -82,8 +101,11 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
 app.MapRazorPages();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+
 
 app.Run();
