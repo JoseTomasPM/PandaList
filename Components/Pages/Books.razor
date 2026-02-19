@@ -1,24 +1,20 @@
 ﻿@page "/books"
 @attribute [Authorize]
 
-@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Identity
+
 @using PandaList.Models
 @using PandaList.Data
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 
+@inject IHttpContextAccessor HttpContextAccessor
 @inject AppDbContext Db
-@inject AuthenticationStateProvider AuthProvider
-@inject NavigationManager Nav
-
-
 
 <h3>Books</h3>
 
 @if (isLoading)
 {
-    <p>Loanding....</p>
+    <p>Loading...</p>
 }
 else
 {
@@ -30,86 +26,66 @@ else
     }
     else
     {
-        <table class="table table table-striped">
-
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Title</th>
                     <th>Author</th>
                     <th>Date read</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-
             <tbody>
                 @foreach (var book in books)
                 {
                     <tr>
                         <td>@book.Title</td>
                         <td>@book.Author</td>
-                        <td>@(book.ReadDate?.ToString("yyyy-MM-dd") ?? "-")</td>
                         <td>
-                            <button class="btn btn-danger btn-sm" @onclick="() => Delete(book.Id)">Delete</button>
+                            @(book.Finished ? "✔️" : "❌")
                         </td>
+
                     </tr>
                 }
             </tbody>
-
-
-
         </table>
     }
-
 }
 
 @if (showModal)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
-
         <div class="modal-dialog">
-
             <div class="modal-content">
-
-
                 <div class="modal-header">
                     <h5 class="modal-title">Add New Book</h5>
                     <button type="button" class="btn-close" @onclick="CloseModal"></button>
                 </div>
-
-
                 <div class="modal-body">
-
                     <EditForm Model="newBook" OnValidSubmit="Save">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
                         <div class="mb-3">
-                            <label class="form-label">Title</label>
+                            <label>Title</label>
                             <InputText class="form-control" @bind-Value="newBook.Title" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Author</label>
+                            <label>Author</label>
                             <InputText class="form-control" @bind-Value="newBook.Author" />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Read Date</label>
-                            <InputDate class="form-control" @bind-Value="newBook.ReadDate" />
-                        </div>
+                        
 
                         <button type="submit" class="btn btn-primary">Save</button>
-
                     </EditForm>
                 </div>
-
-
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                    <button class="btn btn-secondary" @onclick="CloseModal">Close</button>
                 </div>
             </div>
         </div>
     </div>
-
 }
-
 
 @code {
     private List<Book> books = new();
@@ -120,36 +96,48 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var auth = await AuthProvider.GetAuthenticationStateAsync();
-        var user = auth.User;
-        if (user.Identity is not { IsAuthenticated: true })
-        {
-            Nav.NavigateTo("/login");
-            return;
-        }
-        userId = user.FindFirst(c => c.Type.EndsWith("nameidentifier"))?.Value ?? "";
-        books = await Db.Books.Where(f => f.UserId == userId).ToListAsync();
+        var user = HttpContextAccessor.HttpContext?.User;
+
+        if (user == null)
+            return; 
+
+        userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value!;
+
+        books = await Db.Books
+            .Where(b => b.UserId == userId)
+            .ToListAsync();
+
         isLoading = false;
     }
 
 
     private void OpenModal()
     {
-        newBook = new Book();
+        newBook = new Book
+            {
+                Title = "",
+                Author = "",
+                UserId = userId
+            };
         showModal = true;
     }
 
     private void CloseModal() => showModal = false;
 
-
     async Task Save()
     {
+        if (string.IsNullOrEmpty(userId))
+            return;
+
         newBook.UserId = userId;
+
         Db.Books.Add(newBook);
         await Db.SaveChangesAsync();
-        books.Insert(0, newBook);
+
+        books.Add(newBook);
         showModal = false;
     }
+
 
     async Task Delete(int id)
     {

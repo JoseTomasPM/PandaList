@@ -1,4 +1,4 @@
-﻿@page "/films"
+﻿@page "/series"
 @attribute [Authorize]
 
 @using PandaList.Models
@@ -9,7 +9,7 @@
 @inject AppDbContext Db
 @inject AuthenticationStateProvider AuthStateProvider
 
-<h3>Films</h3>
+<h3>Series</h3>
 
 @if (isLoading)
 {
@@ -17,11 +17,11 @@
 }
 else
 {
-    <button class="btn btn-primary mb-3" @onclick="OpenModal">Add New Film</button>
+    <button class="btn btn-primary mb-3" @onclick="OpenModal">Add New Series</button>
 
-    @if (!films.Any())
+    @if (!series.Any())
     {
-        <p>No films yet.</p>
+        <p>No series yet.</p>
     }
     else
     {
@@ -29,23 +29,21 @@ else
             <thead>
                 <tr>
                     <th>Title</th>
-                    <th>Director</th>
-                    <th>Year</th>
-                    <th>Watched</th>
+                    <th>Seasons</th>
+                    <th>Finished</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var f in films)
+                @foreach (var s in series)
                 {
                     <tr>
-                        <td>@f.Title</td>
-                        <td>@f.Director</td>
-                        <td>@(f.Year?.ToString() ?? "-")</td>
-                        <td>@(f.Watched ? "✔️" : "❌")</td>
+                        <td>@s.Title</td>
+                        <td>@s.Seasons</td>
+                        <td>@(s.Finished ? "✔️" : "❌")</td>
                         <td>
                             <button class="btn btn-danger btn-sm"
-                                    @onclick="() => Delete(f.Id)">
+                                    @onclick="() => Delete(s.Id)">
                                 Delete
                             </button>
                         </td>
@@ -63,36 +61,30 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add New Film</h5>
+                    <h5 class="modal-title">Add New Series</h5>
                     <button class="btn-close" @onclick="CloseModal"></button>
                 </div>
 
                 <div class="modal-body">
-                    <EditForm Model="newFilm" OnValidSubmit="Save">
+                    <EditForm Model="newSeries" OnValidSubmit="Save">
                         <DataAnnotationsValidator />
 
                         <div class="mb-3">
                             <label>Title</label>
                             <InputText class="form-control"
-                                       @bind-Value="newFilm.Title" />
+                                       @bind-Value="newSeries.Title" />
                         </div>
 
                         <div class="mb-3">
-                            <label>Director</label>
-                            <InputText class="form-control"
-                                       @bind-Value="newFilm.Director" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Year</label>
+                            <label>Seasons</label>
                             <InputNumber class="form-control"
-                                         @bind-Value="newFilm.Year" />
+                                         @bind-Value="newSeries.Seasons" />
                         </div>
 
                         <div class="form-check mb-3">
                             <InputCheckbox class="form-check-input"
-                                           @bind-Value="newFilm.Watched" />
-                            <label class="form-check-label">Watched</label>
+                                           @bind-Value="newSeries.Finished" />
+                            <label class="form-check-label">Finished</label>
                         </div>
 
                         <button class="btn btn-primary" type="submit">
@@ -106,8 +98,8 @@ else
 }
 
 @code {
-    private List<Film> films = new();
-    private Film newFilm = new();
+    private List<Series> series = new();
+    private Series newSeries = new();
     private bool isLoading = true;
     private bool showModal = false;
     private string userId = "";
@@ -119,8 +111,8 @@ else
 
         userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value;
 
-        films = await Db.Films
-            .Where(f => f.UserId == userId)
+        series = await Db.Series
+            .Where(s => s.UserId == userId)
             .ToListAsync();
 
         isLoading = false;
@@ -128,9 +120,10 @@ else
 
     private void OpenModal()
     {
-        newFilm = new Film
+        newSeries = new Series
             {
-                Watched = false
+                Seasons = 1,
+                Finished = false
             };
         showModal = true;
     }
@@ -139,25 +132,25 @@ else
 
     private async Task Save()
     {
-        newFilm.UserId = userId;
+        newSeries.UserId = userId;
 
-        Db.Films.Add(newFilm);
+        Db.Series.Add(newSeries);
         await Db.SaveChangesAsync();
 
-        films.Add(newFilm);
+        series.Add(newSeries);
         showModal = false;
     }
 
     private async Task Delete(int id)
     {
-        var film = await Db.Films.FindAsync(id);
+        var s = await Db.Series.FindAsync(id);
 
-        if (film is null || film.UserId != userId)
+        if (s is null || s.UserId != userId)
             return;
 
-        Db.Films.Remove(film);
+        Db.Series.Remove(s);
         await Db.SaveChangesAsync();
 
-        films.Remove(film);
+        series.Remove(s);
     }
 }
