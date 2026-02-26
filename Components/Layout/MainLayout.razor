@@ -3,28 +3,34 @@
 @inject NavigationManager Nav
 
 @inherits LayoutComponentBase
-
+<link href="~/app.css" rel="stylesheet" />
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
 
-
-
     <main>
-        <div class="top-row px-4">            
-            <a href="/Identity/Account/Login" class="btn btn-primary mt-3">Login</a>
-            <a href="/Identity/Account/Register" class="btn btn-primary mt-3">Register</a>
+        <div class="top-row px-4 auth-bar">
+
             <AuthorizeView>
                 <Authorized>
-                    <span>Hola @context.User.Identity?.Name</span>
-                    <form method="post" action="Identity/Account/Logout">
-                        <button type="submit">Logout</button>
-                    </form>
-
+                    <span class="user-name">
+                        Hiii @context.User.Identity?.Name
+                    </span>
+                    <a href="/Identity/Account/Logout" class="btn btn-sm btn-ghost">
+                        Logout
+                    </a>
                 </Authorized>
-                
+
+                <NotAuthorized>
+                    <a href="/Identity/Account/Login" class="btn btn-sm btn-ghost">
+                        Login
+                    </a>
+                    <a href="/Identity/Account/Register" class="btn btn-sm btn-primary">
+                        Register
+                    </a>
+                </NotAuthorized>
             </AuthorizeView>
 
         </div>

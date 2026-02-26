@@ -25,7 +25,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
     options.UseNpgsql(connectionString));
 
-// ✅ IDENTITY (SOLO UNA VEZ)
+// IDENTITY 
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
     {
@@ -55,6 +55,15 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Identity/Account/Logout";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 });
+
+// Logout 15min
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+    options.SlidingExpiration = true;
+});
+
 
 var app = builder.Build();
 
