@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Identity
 @inject NavigationManager Nav
 
+
 @inherits LayoutComponentBase
 <link href="~/app.css" rel="stylesheet" />
 <div class="page">
@@ -18,9 +19,11 @@
                     <span class="user-name">
                         Hiii @context.User.Identity?.Name
                     </span>
-                    <a href="/Identity/Account/Logout" class="btn btn-sm btn-ghost">
-                        Logout
-                    </a>
+
+                    <form action="/Identity/Account/Logout?returnUrl=%2F" method="post">
+                        <button type="submit">Logout</button>
+                    </form>
+
                 </Authorized>
 
                 <NotAuthorized>

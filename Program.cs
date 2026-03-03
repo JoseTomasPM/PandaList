@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.AspNetCore.Components;
 
 Env.Load();
 Console.WriteLine("ENV loaded!");
@@ -22,8 +23,10 @@ var connectionString =
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
+/*
+  builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
     options.UseNpgsql(connectionString));
+*/
 
 // IDENTITY 
 builder.Services
@@ -42,12 +45,14 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 builder.Services.AddAuthorizationCore();
 
+
+/*
 // Data Protection
 builder.Services
     .AddDataProtection()
     .PersistKeysToDbContext<DataProtectionKeyContext>()
     .SetApplicationName("PandaList");
-
+*/
 // Cookies
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -56,12 +61,17 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 });
 
-// Logout 15min
 
-builder.Services.ConfigureApplicationCookie(options =>
+
+// Add services to the container.
+
+builder.Services.AddScoped<HttpClient>(sp =>
 {
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
-    options.SlidingExpiration = true;
+    var navigationManager = sp.GetRequiredService<NavigationManager>();
+    return new HttpClient
+    {
+        BaseAddress = new Uri(navigationManager.BaseUri)
+    };
 });
 
 
@@ -87,6 +97,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCookiePolicy();
 
 app.UseAuthentication();
 app.UseAuthorization();
