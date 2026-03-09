@@ -1,0 +1,139 @@
+﻿.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:1.5rem;
+}
+
+.page-title{
+    font-weight:600;
+}
+
+.films-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:1rem;
+}
+
+.films-card{
+    background:#949494;
+    border-radius:12px;
+    padding:1rem;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    transition:all .15s ease;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.films-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.12);
+}
+
+.films-content h5{
+    margin:0;
+    font-size:1.1rem;
+    font-weight:600;
+}
+
+.title{
+    color:#1e1e1e;
+    font-size:1rem;
+}
+
+.author{
+    color:#666;
+    font-size:.9rem;
+}
+
+.films-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:1rem;
+}
+
+.status{
+    font-size:.85rem;
+    color:#555;
+}
+
+.empty-state{
+    text-align:center;
+    padding:3rem;
+    color:#666;
+}
+
+
+/* MODAL */
+
+
+.modal-content{
+    background:#808080;
+    border-radius:14px;
+    border:none;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    padding:0.5rem;
+}
+
+.modal-header{
+    border-bottom:none;
+    padding:1rem 1.2rem 0.5rem 1.2rem;
+}
+
+.modal-title{
+    font-weight:600;
+    font-size:1.2rem;
+}
+
+.modal-body{
+    padding:1rem 1.2rem;
+}
+
+.modal-footer{
+    border-top:none;
+    padding:0.5rem 1.2rem 1rem 1.2rem;
+}
+
+.modal-content input{
+    background:#909090;
+    border:none;
+    border-radius:8px;
+    padding:0.45rem 0.6rem;
+}
+
+.modal-content input:focus{
+    outline:none;
+    box-shadow:0 0 0 2px rgba(0,0,0,0.15);
+}
+
+.modal-content label{
+    font-weight:500;
+    font-size:0.9rem;
+}
+
+.modal-content .btn{
+    border-radius:8px;
+    font-weight:500;
+}
+.modal.fade.show .modal-dialog{
+    animation:modalSlide .18s ease;
+}
+
+@keyframes modalSlide{
+    from{
+        transform:translateY(-20px);
+        opacity:0;
+    }
+    to{
+        transform:translateY(0);
+        opacity:1;
+    }
+}
+.modal-backdrop-custom{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.45);
+    backdrop-filter:blur(2px);
+}

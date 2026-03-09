@@ -1,4 +1,5 @@
 ﻿@page "/books"
+@page "/"
 @attribute [Authorize]
 
 
@@ -9,8 +10,9 @@
 
 @inject IHttpContextAccessor HttpContextAccessor
 @inject AppDbContext Db
+@inject IJSRuntime JS
 
-<h3>Books</h3>
+<h3 class="page-title">My Books (@books.Count)</h3>
 
 @if (isLoading)
 {
@@ -18,61 +20,93 @@
 }
 else
 {
-    <button class="btn btn-primary mb-3" @onclick="OpenModal">Add New Book</button>
+    <button class="btn btn-primary" @onclick="OpenModal">Add New Book</button>
 
-    @if (!books.Any())
-    {
-        <p>No books yet.</p>
-    }
-    else
-    {
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Date read</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
+    <div class="table-container">
+
+        @if (!books.Any())
+        {
+            <p>No books yet.</p>
+        }
+        else
+        {
+            <div class="books-grid">
+
                 @foreach (var book in books)
                 {
-                    <tr>
-                        <td>@book.Title</td>
-                        <td>@book.Author</td>
-                        <td>
-                            @(book.Finished ? "✔️" : "❌")
-                        </td>
+                    <div class="book-card">
 
-                    </tr>
+                        <div class="book-content">
+                            <h5 class="title">@book.Title</h5>
+                            <p class="author">@book.Author</p>
+                            <span class="status">
+                                @(book.Finished ? "✔ Finished" : "📖 Reading")
+                            </span>
+                        </div>
+
+                        <div class="book-footer">
+                                                       
+                            <div class="actions">
+
+                                <button class="btn btn-sm btn-outline-success"
+                                        title="Toggle status"
+                                        @onclick="() => ToggleFinished(book)">
+                                    <i class="bi bi-check"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-primary"
+                                        title="Edit"
+                                        @onclick="() => EditBook(book)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-danger"
+                                        title="Delete book"
+                                        @onclick="() => Delete(book.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                            </div>
+                                                           
+
+                        </div>
+
+                    </div>
                 }
-            </tbody>
-        </table>
-    }
+
+            </div>
+        }
+
+    </div>
 }
 
 @if (showModal)
 {
-    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-backdrop-custom"></div>
+    <div class="modal fade show d-block" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New Book</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
-                </div>
+                
                 <div class="modal-body">
                     <EditForm Model="newBook" OnValidSubmit="Save">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
                         <div class="mb-3">
-                            <label>Title</label>
+                            <label class="form-label">Title</label>
                             <InputText class="form-control" @bind-Value="newBook.Title" />
                         </div>
+
                         <div class="mb-3">
-                            <label>Author</label>
+                            <label class="form-label">Author</label>
                             <InputText class="form-control" @bind-Value="newBook.Author" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox class="form-check-input" @bind-Value="newBook.Finished" />
+                            <label class="form-check-label">
+                                Finished
+                            </label>
                         </div>
                         
 
@@ -93,6 +127,8 @@ else
     private bool showModal = false;
     private Book newBook = new();
     private string userId = "";
+    private bool isEditing = false;
+    private int editingId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,8 +153,10 @@ else
             {
                 Title = "",
                 Author = "",
-                UserId = userId
+                UserId = userId,
+                Finished = false
             };
+
         showModal = true;
     }
 
@@ -129,24 +167,77 @@ else
         if (string.IsNullOrEmpty(userId))
             return;
 
-        newBook.UserId = userId;
+        if (isEditing)
+        {
+            var book = await Db.Books.FindAsync(editingId);
 
-        Db.Books.Add(newBook);
-        await Db.SaveChangesAsync();
+            if (book != null && book.UserId == userId)
+            {
+                book.Title = newBook.Title;
+                book.Author = newBook.Author;
+                book.Finished = newBook.Finished;
 
-        books.Add(newBook);
+                await Db.SaveChangesAsync();
+
+                var index = books.FindIndex(b => b.Id == editingId);
+                if (index != -1)
+                    books[index] = book;
+            }
+        }
+        else
+        {
+            newBook.UserId = userId;
+
+            Db.Books.Add(newBook);
+            await Db.SaveChangesAsync();
+
+            books.Add(newBook);
+        }
+
+        isEditing = false;
         showModal = false;
     }
 
 
     async Task Delete(int id)
     {
+        var confirm = await JS.InvokeAsync<bool>("confirm", "Delete this book?");
+
+        if (!confirm)
+            return;
+
         var libro = await Db.Books.FindAsync(id);
+
         if (libro != null && libro.UserId == userId)
         {
             Db.Books.Remove(libro);
             await Db.SaveChangesAsync();
+
             books.Remove(libro);
         }
+    }
+
+    void EditBook(Book book)
+    {
+        isEditing = true;
+        editingId = book.Id;
+
+        newBook = new Book
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Author = book.Author,
+                UserId = book.UserId,
+                Finished = book.Finished
+            };
+
+        showModal = true;
+    }
+    async Task ToggleFinished(Book book)
+    {
+        book.Finished = !book.Finished;
+
+        Db.Books.Update(book);
+        await Db.SaveChangesAsync();
     }
 }

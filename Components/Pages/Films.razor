@@ -8,8 +8,9 @@
 
 @inject AppDbContext Db
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
 
-<h3>Films</h3>
+<h3 class="page-title">My Films (@films.Count)</h3>
 
 @if (isLoading)
 {
@@ -17,99 +18,122 @@
 }
 else
 {
-    <button class="btn btn-primary mb-3" @onclick="OpenModal">Add New Film</button>
+    <button class="btn btn-primary" @onclick="OpenModal">Add New Film</button>
 
-    @if (!films.Any())
-    {
-        <p>No films yet.</p>
-    }
-    else
-    {
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Director</th>
-                    <th>Year</th>
-                    <th>Watched</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var f in films)
+    <div class="table-container">
+
+        @if (!films.Any())
+        {
+            <p>No films yet.</p>
+        }
+        else
+        {
+            <div class="films-grid">
+
+                @foreach (var film in films)
                 {
-                    <tr>
-                        <td>@f.Title</td>
-                        <td>@f.Director</td>
-                        <td>@(f.Year?.ToString() ?? "-")</td>
-                        <td>@(f.Watched ? "✔️" : "❌")</td>
-                        <td>
-                            <button class="btn btn-danger btn-sm"
-                                    @onclick="() => Delete(f.Id)">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
+                    <div class="films-card">
+
+                        <div class="film-content">
+                            <h5 class="title">@film.Title</h5>
+                            <p class="author">@film.Director</p>
+                            <span class="status">
+                                @(film.Watched ? "✔ Watched" : "🎬 To Watch")
+                            </span>
+                        </div>
+
+                        <div class="film-footer">
+
+                            <div class="actions">
+
+                                <button class="btn btn-sm btn-outline-success"
+                                        @onclick="() => ToggleWatched(film)">
+                                    <i class="bi bi-check"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-primary"
+                                        @onclick="() => EditFilm(film)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-danger"
+                                        @onclick="() => Delete(film.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
                 }
-            </tbody>
-        </table>
-    }
+
+            </div>
+        }
+
+    </div>
 }
 
 @if (showModal)
 {
-    <div class="modal fade show d-block" tabindex="-1"
-         style="background: rgba(0,0,0,0.5);">
+    <div class="modal-backdrop-custom"></div>
+    <div class="modal fade show d-block">
+
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New Film</h5>
-                    <button class="btn-close" @onclick="CloseModal"></button>
-                </div>
 
                 <div class="modal-body">
+
                     <EditForm Model="newFilm" OnValidSubmit="Save">
+
                         <DataAnnotationsValidator />
 
                         <div class="mb-3">
                             <label>Title</label>
-                            <InputText class="form-control"
-                                       @bind-Value="newFilm.Title" />
+                            <InputText class="form-control" @bind-Value="newFilm.Title" />
                         </div>
 
                         <div class="mb-3">
                             <label>Director</label>
-                            <InputText class="form-control"
-                                       @bind-Value="newFilm.Director" />
+                            <InputText class="form-control" @bind-Value="newFilm.Director" />
                         </div>
 
                         <div class="mb-3">
                             <label>Year</label>
-                            <InputNumber class="form-control"
-                                         @bind-Value="newFilm.Year" />
+                            <InputNumber class="form-control" @bind-Value="newFilm.Year" />
                         </div>
 
                         <div class="form-check mb-3">
-                            <InputCheckbox class="form-check-input"
-                                           @bind-Value="newFilm.Watched" />
+                            <InputCheckbox class="form-check-input" @bind-Value="newFilm.Watched" />
                             <label class="form-check-label">Watched</label>
                         </div>
 
-                        <button class="btn btn-primary" type="submit">
-                            Save
-                        </button>
+                        <button class="btn btn-primary" type="submit">Save</button>
+
                     </EditForm>
+
                 </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                </div>
+
             </div>
         </div>
+
     </div>
 }
 
 @code {
+
     private List<Film> films = new();
     private Film newFilm = new();
     private bool isLoading = true;
     private bool showModal = false;
+
+    private bool isEditing = false;
+    private int editingId;
+
     private string userId = "";
 
     protected override async Task OnInitializedAsync()
@@ -126,38 +150,80 @@ else
         isLoading = false;
     }
 
-    private void OpenModal()
+    void OpenModal()
     {
-        newFilm = new Film
-            {
-                Watched = false
-            };
+        newFilm = new Film { Watched = false };
         showModal = true;
     }
 
-    private void CloseModal() => showModal = false;
+    void CloseModal() => showModal = false;
 
-    private async Task Save()
+    async Task Save()
     {
-        newFilm.UserId = userId;
+        if (isEditing)
+        {
+            var film = await Db.Films.FindAsync(editingId);
 
-        Db.Films.Add(newFilm);
-        await Db.SaveChangesAsync();
+            if (film != null)
+            {
+                film.Title = newFilm.Title;
+                film.Director = newFilm.Director;
+                film.Year = newFilm.Year;
+                film.Watched = newFilm.Watched;
 
-        films.Add(newFilm);
+                await Db.SaveChangesAsync();
+            }
+        }
+        else
+        {
+            newFilm.UserId = userId;
+            Db.Films.Add(newFilm);
+            await Db.SaveChangesAsync();
+            films.Add(newFilm);
+        }
+
+        isEditing = false;
         showModal = false;
     }
 
-    private async Task Delete(int id)
+    async Task Delete(int id)
     {
+        var confirm = await JS.InvokeAsync<bool>("confirm", "Delete this film?");
+
+        if (!confirm) return;
+
         var film = await Db.Films.FindAsync(id);
 
-        if (film is null || film.UserId != userId)
-            return;
-
-        Db.Films.Remove(film);
-        await Db.SaveChangesAsync();
-
-        films.Remove(film);
+        if (film != null)
+        {
+            Db.Films.Remove(film);
+            await Db.SaveChangesAsync();
+            films.Remove(film);
+        }
     }
+
+    void EditFilm(Film film)
+    {
+        isEditing = true;
+        editingId = film.Id;
+
+        newFilm = new Film
+            {
+                Id = film.Id,
+                Title = film.Title,
+                Director = film.Director,
+                Year = film.Year,
+                Watched = film.Watched
+            };
+
+        showModal = true;
+    }
+
+    async Task ToggleWatched(Film film)
+    {
+        film.Watched = !film.Watched;
+        Db.Films.Update(film);
+        await Db.SaveChangesAsync();
+    }
+
 }
