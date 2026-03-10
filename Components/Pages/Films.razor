@@ -18,7 +18,7 @@
 }
 else
 {
-    <button class="btn btn-primary" @onclick="OpenModal">Add New Film</button>
+    <button class="btn btn-secondary mb-3" @onclick="OpenModal">Add New Film</button>
 
     <div class="table-container">
 
@@ -46,17 +46,17 @@ else
 
                             <div class="actions">
 
-                                <button class="btn btn-sm btn-outline-success"
+                                <button class="btn btn-sm btn-success"
                                         @onclick="() => ToggleWatched(film)">
                                     <i class="bi bi-check"></i>
                                 </button>
 
-                                <button class="btn btn-sm btn-outline-primary"
+                                <button class="btn btn-sm btn-light"
                                         @onclick="() => EditFilm(film)">
                                     <i class="bi bi-pencil"></i>
                                 </button>
 
-                                <button class="btn btn-sm btn-outline-danger"
+                                <button class="btn btn-sm btn-danger"
                                         @onclick="() => Delete(film.Id)">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -108,13 +108,14 @@ else
                             <label class="form-check-label">Watched</label>
                         </div>
 
-                        <button class="btn btn-primary" type="submit">Save</button>
+                       
 
                     </EditForm>
 
                 </div>
 
                 <div class="modal-footer">
+                    <button class="btn btn-light" type="submit">Save</button>
                     <button class="btn btn-secondary" @onclick="CloseModal">Close</button>
                 </div>
 

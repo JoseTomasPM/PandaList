@@ -17,7 +17,7 @@
 }
 else
 {
-    <button class="btn btn-primary" @onclick="OpenModal">Add New Series</button>
+    <button class="btn btn-secondary mb-3" @onclick="OpenModal">Add New Series</button>
 
     <div class="table-container">
 
@@ -44,19 +44,19 @@ else
                         <div class="series-footer">
                             <div class="actions">
 
-                                <button class="btn btn-sm btn-outline-success"
+                                <button class="btn btn-sm btn-success"
                                         @onclick="() => ToggleFinished(s)"
                                         title="Toggle finished">
                                     <i class="bi bi-check"></i>
                                 </button>
 
-                                <button class="btn btn-sm btn-outline-primary"
+                                <button class="btn btn-sm btn-light"
                                         @onclick="() => EditSeries(s)"
                                         title="Edit series">
                                     <i class="bi bi-pencil"></i>
                                 </button>
 
-                                <button class="btn btn-sm btn-outline-danger"
+                                <button class="btn btn-sm btn-danger"
                                         @onclick="() => Delete(s.Id)"
                                         title="Delete series">
                                     <i class="bi bi-trash"></i>
@@ -101,11 +101,11 @@ else
                             <label class="form-check-label">Finished</label>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Save</button>
                     </EditForm>
                 </div>
 
                 <div class="modal-footer">
+                    <button class="btn btn-light" type="submit">Save</button>
                     <button class="btn btn-secondary" @onclick="CloseModal">Close</button>
                 </div>
 

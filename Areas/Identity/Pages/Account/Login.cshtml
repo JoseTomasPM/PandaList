@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = "Log in";
 }
-<link href="~/app.css" rel="stylesheet" />
+<link href="/app.css" rel="stylesheet" />
 <h1>@ViewData["Title"]</h1>
 <div class="row">
     <div class="col-md-4">
@@ -29,18 +29,23 @@
                         @Html.DisplayNameFor(m => m.Input.RememberMe)
                     </label>
                 </div>
-                <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+                <div class ="d-grid gap-2">
+                    <button id="login-submit" type="submit" class="btn btn-lg btn-success mb-3">Log in</button>
                 </div>
-                <div>
+
+
+
+
+
+                <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
                     <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                        <a id="forgot-password" asp-page="./ForgotPassword" class="btn btn-outline-primary btn-sm ">Forgot your password?</a>
                     </p>
                     <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-outline-primary btn-sm">Register as a new user</a>
                     </p>
                     <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
+                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="btn btn-outline-primary btn-sm">Resend email confirmation</a>
                     </p>
                 </div>
             </form>

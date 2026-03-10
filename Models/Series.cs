@@ -6,9 +6,9 @@ namespace PandaList.Models
     public class Series
     {
         public int Id { get; set; }
-      
+        [Required]
         public string Title { get; set; } = null!;
-
+        [Required]
         public int Seasons { get; set; }
 
         public bool Finished { get; set; }

@@ -1,4 +1,10 @@
-﻿.page-header{
+﻿body {
+    background: #494949;
+
+}
+
+
+.page-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -115,7 +121,6 @@
 
 .modal-content .btn{
     border-radius:8px;
-    font-weight:500;
 }
 .modal.fade.show .modal-dialog{
     animation:modalSlide .18s ease;

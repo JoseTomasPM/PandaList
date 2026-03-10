@@ -1,129 +1,70 @@
-/* =========================================
-   1. VARIABLES (Design System)
-========================================= */
+/* --------------------------------------------
+   FORMULARIOS DE AUTENTICACIÓN (Login/Register/Forgot)
+-------------------------------------------- */
 
-:root {
-    --bg-primary: #1e1f22;
-    --bg-secondary: #2b2d31;
-    --bg-tertiary: #313338;
-    --text-primary: #e3e5e8;
-    --text-muted: #a1a1aa;
-    --border-color: #3f4147;
+/* Contenedor del formulario */
 
-    --accent-color: #HEX_AQUI;
+
+body {
+    background: #494949;
 }
 
-/* =========================================
-   2. RESET & BASE
-========================================= */
-
-html, body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+form#account,
+form#registerForm
+{
+    background: #808080;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    margin-bottom: 2rem;
 }
 
-/* =========================================
-   3. LAYOUT
-========================================= */
-
-.page {
-    display: flex;
-    min-height: 100vh;
-}
-
-.sidebar {
-    width: 250px;
-    background-color: var(--bg-secondary);
-    border-right: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-}
-
-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.top-row {
-    height: 3.5rem;
-    background-color: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0 1.5rem;
-    gap: 1rem;
-}
-
-/* =========================================
-   4. NAVIGATION
-========================================= */
-
-.navbar-brand {
-    font-size: 1.1rem;
+/* Titulos h1 y h2 dentro de formularios */
+form h1, form h2 {
+    color: #1e1e1e;
     font-weight: 600;
 }
 
-.nav-item {
-    padding: 0.25rem 0;
+/* Inputs */
+input.form-control {
+    background: #909090;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    color: #1e1e1e;
 }
 
-.nav-link {
-    color: var(--text-muted);
-    border-radius: 6px;
-    height: 2.75rem;
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-    transition: 0.15s ease;
+input.form-control:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
 }
 
-.nav-link:hover {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-}
-
-.nav-link.active {
-    background-color: var(--accent-color);
-    color: white;
-}
-
-/* =========================================
-   5. COMPONENTS
-========================================= */
-
-.user-name {
-    color: var(--text-muted);
+/* Labels */
+label.form-label {
     font-weight: 500;
+    font-size: 0.9rem;
 }
 
-.btn-sm {
-    padding: 0.35rem 0.75rem;
+/* Espaciado */
+.form-floating {
+    margin-bottom: 1rem;
+}
+
+/* Mensajes de error */
+.text-danger {
     font-size: 0.85rem;
-    border-radius: 6px;
 }
 
-.btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+/* Botones */
+
+
+
+/* Centrar contenido en la página */
+.row > .col-md-4 {
+    margin: 0 auto;
 }
 
-.btn-ghost:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
-
-.btn-primary {
-    background-color: var(--accent-color);
-    border: 1px solid var(--accent-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    filter: brightness(1.1);
+/* Botones de ancho completo */
+.w-100 {
+    width: 100%;
 }
