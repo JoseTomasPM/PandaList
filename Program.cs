@@ -21,7 +21,15 @@ var connectionString =
 
 // DbContexts
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString , npgsqlOptions =>
+    {
+        npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+            errorCodesToAdd: null
+        );
+    })
+);
 
 /*
   builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
